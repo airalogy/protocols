@@ -1,0 +1,12 @@
+{
+    "editor.formatOnSave": false,
+    "cSpell.words": [
+        "aimd",
+        "Airalogy"
+    ],
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "Please write the commit message in English."
+        }
+    ]
+}
