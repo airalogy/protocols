@@ -1,0 +1,11 @@
+# Meeting Notes
+
+Meeting title: {{var|title: str}}
+Start time: {{var|start_time: CurrentTime}}
+End time: {{var|end_time: CurrentTime}}
+Attendees: {{var|attendees: list[str]}}
+Recorder: {{var|recorder: str}}
+
+## Notes
+
+{{var|content: AiralogyMarkdown}}

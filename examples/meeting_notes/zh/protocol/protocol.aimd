@@ -1,0 +1,11 @@
+# 会议记录
+
+会议标题: {{var|title: str}}
+会议开始时间: {{var|start_time: CurrentTime}}
+会议结束时间: {{var|end_time: CurrentTime}}
+参会人：{{var|attendees: list[str]}}
+记录人: {{var|recorder: str}}
+
+## 会议内容
+
+{{var|content: AiralogyMarkdown}}
