@@ -6,6 +6,6 @@ readme = "README.md"
 maintainers = [{ name = "Airalogy Team" }]
 requires-python = ">=3.13"
 dependencies = [
-    "airalogy==0.0.10",
+    "airalogy==0.0.13",
     "openai>=2.14.0",
 ]

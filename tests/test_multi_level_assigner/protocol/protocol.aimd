@@ -1,0 +1,135 @@
+# Multi-level Assigner Trigger Test
+
+This protocol is a test fixture for validating assigner trigger behavior across different `mode`s, using multiple independent lines (field names are prefixed for readability, e.g. `a_f*`, `b_f*`, `c_f*`).
+
+Covered modes:
+
+- `auto`: triggers automatically when dependencies change (multi-hop chain)
+- `manual`: runs only when the user clicks Assign (middle node)
+- `auto_first`: triggers automatically once, then stops auto-refreshing
+
+Special case covered:
+
+- Long-running assigner simulation: uses `time.sleep()` inside an `auto` assigner to emulate slow work and observe downstream behavior/timestamps.
+
+## Line A: multi-hop `auto` chain
+
+Relationships:
+
+- `a_f3 = a_f1 + a_f2`
+- `a_f4 = a_f3 * 3`
+- `a_f5 = a_f4^2`
+
+Inputs:
+
+- `a_f1`: {{var|a_f1: int = 3, description="Line A input 1"}}
+- `a_f2`: {{var|a_f2: int = 4, description="Line A input 2"}}
+
+Computed (auto):
+
+- `a_f3`: {{var|a_f3: int, description="auto: a_f3 = a_f1 + a_f2"}}
+- `a_f4`: {{var|a_f4: int, description="auto: a_f4 = a_f3 * 3"}}
+- `a_f5`: {{var|a_f5: int, description="auto: a_f5 = a_f4^2"}}
+
+Expected behavior:
+
+- When `a_f1` or `a_f2` changes, `a_f3` auto-updates.
+- Then `a_f4` auto-updates due to `a_f3` change.
+- Then `a_f5` auto-updates due to `a_f4` change.
+- If any hop does not trigger, it indicates a multi-hop dependency propagation issue.
+
+## Line B: `manual` middle node + downstream slow `auto`
+
+Relationships:
+
+- `b_f5 = b_f1 * b_f2 + b_f3` (manual)
+- `b_f6 = b_f5 * 2` (auto + sleep)
+- `b_f4` controls the sleep duration in seconds (clamped to `[0, 10]`)
+
+Inputs:
+
+- `b_f1`: {{var|b_f1: int = 2, description="Line B input 1"}}
+- `b_f2`: {{var|b_f2: int = 5, description="Line B input 2"}}
+- `b_f3`: {{var|b_f3: int = 10, description="Line B manual offset"}}
+- `b_f4`: {{var|b_f4: int = 2, ge=0, le=10, description="Line B delay seconds"}}
+
+Computed:
+
+- `b_f5` (manual): {{var|b_f5: int, description="manual: b_f5 = b_f1 * b_f2 + b_f3"}}
+- `b_f6` (slow auto): {{var|b_f6: int, description="auto+sleep: b_f6 = b_f5 * 2"}}
+- `b_f7` started_at (auto): {{var|b_f7: str, description="auto: slow assigner start time (UTC ISO)"}}
+- `b_f8` finished_at (auto): {{var|b_f8: str, description="auto: slow assigner end time (UTC ISO)"}}
+
+Expected behavior:
+
+- Changing `b_f1`/`b_f2`/`b_f3` does NOT auto-update `b_f5` (because it is `manual`).
+- Clicking Assign for the manual assigner updates `b_f5`.
+- After `b_f5` updates, downstream `b_f6`/`b_f7`/`b_f8` should auto-trigger.
+- The difference between `b_f8` and `b_f7` should be approximately `b_f4` seconds (clamped), which helps spot slow-assigner scheduling/timeout issues.
+
+## Line C: `auto_first` one-shot
+
+Relationships:
+
+- `c_f3 = c_f1 + c_f2` (auto_first)
+
+Inputs:
+
+- `c_f1`: {{var|c_f1: int = 1, description="Line C input 1"}}
+- `c_f2`: {{var|c_f2: int = 2, description="Line C input 2"}}
+
+Computed (auto_first):
+
+- `c_f3`: {{var|c_f3: int, description="auto_first: one-shot sum generated once"}}
+
+Expected behavior:
+
+- `c_f3` is generated once when `c_f1` and `c_f2` are first ready.
+- Later changes to `c_f1`/`c_f2` should NOT auto-refresh `c_f3`.
+- If it keeps auto-refreshing, `auto_first` is behaving like `auto` (potential bug/regression).
+
+## Line D: multi-hop `auto` chain with missing defaults (should NOT auto-run on open)
+
+Relationships:
+
+- `d_f3 = d_f1 + d_f2`
+- `d_f4 = d_f3 * 3`
+- `d_f5 = d_f4^2`
+
+Inputs (intentionally incomplete at start):
+
+- `d_f1`: {{var|d_f1: int, description="Line D input 1 (no default on purpose)"}}
+- `d_f2`: {{var|d_f2: int = 4, description="Line D input 2"}}
+
+Computed (auto):
+
+- `d_f3`: {{var|d_f3: int, description="auto: d_f3 = d_f1 + d_f2"}}
+- `d_f4`: {{var|d_f4: int, description="auto: d_f4 = d_f3 * 3"}}
+- `d_f5`: {{var|d_f5: int, description="auto: d_f5 = d_f4^2"}}
+
+Expected behavior:
+
+- On protocol open, because `d_f1` is missing, `d_f3`/`d_f4`/`d_f5` should not be computed yet.
+- After you fill `d_f1`, the chain should start and auto-propagate `d_f3` → `d_f4` → `d_f5`.
+- If it computes with an empty `d_f1`, it indicates “missing value” handling is incorrect.
+
+## Line E: `auto_first` with missing defaults (should run once when ready)
+
+Relationships:
+
+- `e_f3 = e_f1 + e_f2` (auto_first)
+
+Inputs (intentionally incomplete at start):
+
+- `e_f1`: {{var|e_f1: int, description="Line E input 1 (no default on purpose)"}}
+- `e_f2`: {{var|e_f2: int = 2, description="Line E input 2"}}
+
+Computed (auto_first):
+
+- `e_f3`: {{var|e_f3: int, description="auto_first: one-shot sum generated once when inputs become ready"}}
+
+Expected behavior:
+
+- On protocol open, because `e_f1` is missing, `e_f3` should not be generated yet.
+- After you fill `e_f1`, `e_f3` should generate exactly once.
+- Later changes to `e_f1`/`e_f2` should NOT auto-refresh `e_f3` unless manually triggered.
