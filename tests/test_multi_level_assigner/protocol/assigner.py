@@ -83,6 +83,50 @@ def line_b_slow_auto(dependent_fields: dict[str, Any]) -> AssignerResult:
 
 
 @assigner(
+    assigned_fields=["b_f9", "b_f10", "b_f11"],
+    dependent_fields=["b_f5", "b_f6"],
+    mode="manual",
+)
+def line_b_downstream_manual(dependent_fields: dict[str, Any]) -> AssignerResult:
+    b_f5 = int(dependent_fields["b_f5"])
+    b_f6 = int(dependent_fields["b_f6"])
+
+    started_at = _now_iso()
+    b_f9 = b_f5 + b_f6
+    finished_at = _now_iso()
+
+    return AssignerResult(
+        assigned_fields={
+            "b_f9": b_f9,
+            "b_f10": started_at,
+            "b_f11": finished_at,
+        }
+    )
+
+
+@assigner(
+    assigned_fields=["b_f12", "b_f13", "b_f14"],
+    dependent_fields=["b_f5", "b_f6"],
+    mode="auto",
+)
+def line_b_downstream_auto(dependent_fields: dict[str, Any]) -> AssignerResult:
+    b_f5 = int(dependent_fields["b_f5"])
+    b_f6 = int(dependent_fields["b_f6"])
+
+    started_at = _now_iso()
+    b_f12 = b_f5 * b_f6
+    finished_at = _now_iso()
+
+    return AssignerResult(
+        assigned_fields={
+            "b_f12": b_f12,
+            "b_f13": started_at,
+            "b_f14": finished_at,
+        }
+    )
+
+
+@assigner(
     assigned_fields=["c_f3"],
     dependent_fields=["c_f1", "c_f2"],
     mode="auto_first",

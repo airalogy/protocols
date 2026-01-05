@@ -11,6 +11,7 @@ Covered modes:
 Special case covered:
 
 - Long-running assigner simulation: uses `time.sleep()` inside an `auto` assigner to emulate slow work and observe downstream behavior/timestamps.
+- Downstream `manual`/`auto` assigners that depend on the slow assigner, each with start/end timestamps to verify trigger order.
 
 ## Line A: multi-hop `auto` chain
 
@@ -38,20 +39,22 @@ Expected behavior:
 - Then `a_f5` auto-updates due to `a_f4` change.
 - If any hop does not trigger, it indicates a multi-hop dependency propagation issue.
 
-## Line B: `manual` middle node + downstream slow `auto`
+## Line B: `manual` middle node + downstream slow `auto` + dependent `manual`/`auto`
 
 Relationships:
 
 - `b_f5 = b_f1 * b_f2 + b_f3` (manual)
 - `b_f6 = b_f5 * 2` (auto + sleep)
-- `b_f4` controls the sleep duration in seconds (clamped to `[0, 10]`)
+- `b_f9 = b_f5 + b_f6` (manual)
+- `b_f12 = b_f5 * b_f6` (auto)
+- `b_f4` controls the sleep duration in seconds (clamped to `[0, 60]`)
 
 Inputs:
 
 - `b_f1`: {{var|b_f1: int = 2, description="Line B input 1"}}
 - `b_f2`: {{var|b_f2: int = 5, description="Line B input 2"}}
 - `b_f3`: {{var|b_f3: int = 10, description="Line B manual offset"}}
-- `b_f4`: {{var|b_f4: int = 2, ge=0, le=10, description="Line B delay seconds"}}
+- `b_f4`: {{var|b_f4: int = 10, ge=0, le=60, description="Line B delay seconds"}}
 
 Computed:
 
@@ -59,13 +62,22 @@ Computed:
 - `b_f6` (slow auto): {{var|b_f6: int, description="auto+sleep: b_f6 = b_f5 * 2"}}
 - `b_f7` started_at (auto): {{var|b_f7: str, description="auto: slow assigner start time (UTC ISO)"}}
 - `b_f8` finished_at (auto): {{var|b_f8: str, description="auto: slow assigner end time (UTC ISO)"}}
+- `b_f9` (manual): {{var|b_f9: int, description="manual: b_f9 = b_f5 + b_f6"}}
+- `b_f10` started_at (manual): {{var|b_f10: str, description="manual: downstream assigner start time (UTC ISO)"}}
+- `b_f11` finished_at (manual): {{var|b_f11: str, description="manual: downstream assigner end time (UTC ISO)"}}
+- `b_f12` (auto): {{var|b_f12: int, description="auto: b_f12 = b_f5 * b_f6"}}
+- `b_f13` started_at (auto): {{var|b_f13: str, description="auto: downstream assigner start time (UTC ISO)"}}
+- `b_f14` finished_at (auto): {{var|b_f14: str, description="auto: downstream assigner end time (UTC ISO)"}}
 
 Expected behavior:
 
 - Changing `b_f1`/`b_f2`/`b_f3` does NOT auto-update `b_f5` (because it is `manual`).
 - Clicking Assign for the manual assigner updates `b_f5`.
 - After `b_f5` updates, downstream `b_f6`/`b_f7`/`b_f8` should auto-trigger.
+- After `b_f6` finishes, downstream `b_f12`/`b_f13`/`b_f14` should auto-trigger.
+- The downstream manual `b_f9`/`b_f10`/`b_f11` should NOT auto-trigger; it runs only when manually assigned after `b_f5` and `b_f6` are ready.
 - The difference between `b_f8` and `b_f7` should be approximately `b_f4` seconds (clamped), which helps spot slow-assigner scheduling/timeout issues.
+- The differences between `b_f11`/`b_f10` and `b_f14`/`b_f13` should be small (no sleep), confirming downstream runtime capture.
 
 ## Line C: `auto_first` one-shot
 
