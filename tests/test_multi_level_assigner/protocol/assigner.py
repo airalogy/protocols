@@ -179,3 +179,112 @@ def line_e_auto_first_missing_defaults(
     e_f1 = int(dependent_fields["e_f1"])
     e_f2 = int(dependent_fields["e_f2"])
     return AssignerResult(assigned_fields={"e_f3": e_f1 + e_f2})
+
+
+@assigner(
+    assigned_fields=["f_f6"],
+    dependent_fields=["f_f1", "f_f2"],
+    mode="auto",
+)
+def line_f_f6(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f1 = int(dependent_fields["f_f1"])
+    f_f2 = int(dependent_fields["f_f2"])
+    return AssignerResult(assigned_fields={"f_f6": f_f1 + f_f2})
+
+
+@assigner(
+    assigned_fields=["f_f7"],
+    dependent_fields=["f_f2", "f_f3"],
+    mode="auto",
+)
+def line_f_f7(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f2 = int(dependent_fields["f_f2"])
+    f_f3 = int(dependent_fields["f_f3"])
+    return AssignerResult(assigned_fields={"f_f7": f_f2 * f_f3})
+
+
+@assigner(
+    assigned_fields=["f_f8"],
+    dependent_fields=["f_f4", "f_f5"],
+    mode="auto",
+)
+def line_f_f8(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f4 = int(dependent_fields["f_f4"])
+    f_f5 = int(dependent_fields["f_f5"])
+    return AssignerResult(assigned_fields={"f_f8": f_f4 - f_f5})
+
+
+@assigner(
+    assigned_fields=["f_f9"],
+    dependent_fields=["f_f6", "f_f7"],
+    mode="auto",
+)
+def line_f_f9(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f6 = int(dependent_fields["f_f6"])
+    f_f7 = int(dependent_fields["f_f7"])
+    return AssignerResult(assigned_fields={"f_f9": f_f6 * f_f7})
+
+
+@assigner(
+    assigned_fields=["f_f10"],
+    dependent_fields=["f_f9", "f_f8"],
+    mode="auto",
+)
+def line_f_f10(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f9 = int(dependent_fields["f_f9"])
+    f_f8 = int(dependent_fields["f_f8"])
+    return AssignerResult(assigned_fields={"f_f10": f_f9 + f_f8})
+
+
+@assigner(
+    assigned_fields=["f_f11"],
+    dependent_fields=["f_f10"],
+    mode="auto",
+)
+def line_f_f11(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f10 = int(dependent_fields["f_f10"])
+    return AssignerResult(assigned_fields={"f_f11": f_f10 * 2})
+
+
+@assigner(
+    assigned_fields=["f_f12"],
+    dependent_fields=["f_f11", "f_f6"],
+    mode="auto",
+)
+def line_f_f12(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f11 = int(dependent_fields["f_f11"])
+    f_f6 = int(dependent_fields["f_f6"])
+    return AssignerResult(assigned_fields={"f_f12": f_f11 + f_f6})
+
+
+@assigner(
+    assigned_fields=["f_f13"],
+    dependent_fields=["f_f12", "f_f7"],
+    mode="auto",
+)
+def line_f_f13(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f12 = int(dependent_fields["f_f12"])
+    f_f7 = int(dependent_fields["f_f7"])
+    return AssignerResult(assigned_fields={"f_f13": f_f12 + f_f7})
+
+
+@assigner(
+    assigned_fields=["f_f14"],
+    dependent_fields=["f_f13", "f_f8"],
+    mode="auto",
+)
+def line_f_f14(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f13 = int(dependent_fields["f_f13"])
+    f_f8 = int(dependent_fields["f_f8"])
+    return AssignerResult(assigned_fields={"f_f14": f_f13 + f_f8})
+
+
+@assigner(
+    assigned_fields=["f_f15"],
+    dependent_fields=["f_f14", "f_f1"],
+    mode="auto",
+)
+def line_f_f15(dependent_fields: dict[str, Any]) -> AssignerResult:
+    f_f14 = int(dependent_fields["f_f14"])
+    f_f1 = int(dependent_fields["f_f1"])
+    return AssignerResult(assigned_fields={"f_f15": f_f14 - f_f1})

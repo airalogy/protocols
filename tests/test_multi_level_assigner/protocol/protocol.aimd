@@ -145,3 +145,78 @@ Expected behavior:
 - On protocol open, because `e_f1` is missing, `e_f3` should not be generated yet.
 - After you fill `e_f1`, `e_f3` should generate exactly once.
 - Later changes to `e_f1`/`e_f2` should NOT auto-refresh `e_f3` unless manually triggered.
+
+## Line F: large multi-level `auto` graph (all defaults)
+
+Relationships:
+
+- `f_f6 = f_f1 + f_f2`
+- `f_f7 = f_f2 * f_f3`
+- `f_f8 = f_f4 - f_f5`
+- `f_f9 = f_f6 * f_f7`
+- `f_f10 = f_f9 + f_f8`
+- `f_f11 = f_f10 * 2`
+- `f_f12 = f_f11 + f_f6`
+- `f_f13 = f_f12 + f_f7`
+- `f_f14 = f_f13 + f_f8`
+- `f_f15 = f_f14 - f_f1`
+
+```mermaid
+flowchart LR
+  f_f1([f_f1]) --> f_f6{{f_f6}}
+  f_f2([f_f2]) --> f_f6
+
+  f_f2 --> f_f7{{f_f7}}
+  f_f3([f_f3]) --> f_f7
+
+  f_f4([f_f4]) --> f_f8{{f_f8}}
+  f_f5([f_f5]) --> f_f8
+
+  f_f6 --> f_f9{{f_f9}}
+  f_f7 --> f_f9
+
+  f_f9 --> f_f10{{f_f10}}
+  f_f8 --> f_f10
+
+  f_f10 --> f_f11{{f_f11}}
+
+  f_f11 --> f_f12{{f_f12}}
+  f_f6 --> f_f12
+
+  f_f12 --> f_f13{{f_f13}}
+  f_f7 --> f_f13
+
+  f_f13 --> f_f14{{f_f14}}
+  f_f8 --> f_f14
+
+  f_f14 --> f_f15{{f_f15}}
+  f_f1 --> f_f15
+```
+
+Inputs (all have defaults so the chain runs on open):
+
+- `f_f1`: {{var|f_f1: int = 3, description="Line F input 1"}}
+- `f_f2`: {{var|f_f2: int = 4, description="Line F input 2"}}
+- `f_f3`: {{var|f_f3: int = 5, description="Line F input 3"}}
+- `f_f4`: {{var|f_f4: int = 20, description="Line F input 4"}}
+- `f_f5`: {{var|f_f5: int = 7, description="Line F input 5"}}
+
+Computed (auto):
+
+Note: the expected values below assume the initial default inputs; changing inputs will change these results.
+
+- `f_f6`: {{var|f_f6: int, description="auto: f_f6 = f_f1 + f_f2 (expected 7)"}}
+- `f_f7`: {{var|f_f7: int, description="auto: f_f7 = f_f2 * f_f3 (expected 20)"}}
+- `f_f8`: {{var|f_f8: int, description="auto: f_f8 = f_f4 - f_f5 (expected 13)"}}
+- `f_f9`: {{var|f_f9: int, description="auto: f_f9 = f_f6 * f_f7 (expected 140)"}}
+- `f_f10`: {{var|f_f10: int, description="auto: f_f10 = f_f9 + f_f8 (expected 153)"}}
+- `f_f11`: {{var|f_f11: int, description="auto: f_f11 = f_f10 * 2 (expected 306)"}}
+- `f_f12`: {{var|f_f12: int, description="auto: f_f12 = f_f11 + f_f6 (expected 313)"}}
+- `f_f13`: {{var|f_f13: int, description="auto: f_f13 = f_f12 + f_f7 (expected 333)"}}
+- `f_f14`: {{var|f_f14: int, description="auto: f_f14 = f_f13 + f_f8 (expected 346)"}}
+- `f_f15`: {{var|f_f15: int, description="auto: f_f15 = f_f14 - f_f1 (expected 343)"}}
+
+Expected behavior:
+
+- On protocol open, all `f_f6`–`f_f15` should compute automatically since inputs are ready.
+- Changing any input should re-trigger the dependent chain; for example, changing `f_f3` should update `f_f7` → `f_f9` → `f_f10` → `f_f11` → `f_f12` → `f_f13` → `f_f14` → `f_f15` (if `f_f3=10`, then `f_f7=40`, `f_f9=280`, `f_f10=293`, `f_f11=586`, `f_f12=593`, `f_f13=633`, `f_f14=646`, `f_f15=643`).
