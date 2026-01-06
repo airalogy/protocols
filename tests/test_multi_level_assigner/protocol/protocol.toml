@@ -1,6 +1,6 @@
 [airalogy_protocol]
 id = "test_multi_level_assigner"
-version = "0.0.3"
+version = "0.0.4"
 name = "Multi-level Assigner Trigger Test"
 description = "Test fixture for multi-level assigner chains, including auto/manual/auto_first modes and a slow assigner via sleep."
 authors = [
