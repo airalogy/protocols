@@ -1,6 +1,6 @@
 [airalogy_protocol]
 id = "meeting_notes_zh"
-version = "0.0.2"
+version = "0.0.3"
 name = "会议记录"
 description = "通用的日常会议记录模板，适用于各种团队和项目。"
 authors = [

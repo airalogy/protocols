@@ -1,6 +1,6 @@
 [airalogy_protocol]
 id = "meeting_notes_en"
-version = "0.0.2"
+version = "0.0.3"
 name = "Meeting Notes"
 description = "A general-purpose meeting notes template for everyday meetings across teams and projects."
 authors = [
@@ -12,4 +12,3 @@ maintainers = [
 disciplines = ["Project Management", "Team Collaboration", "Productivity"]
 keywords = ["meeting notes", "team collaboration", "project management"]
 license = "Apache-2.0"
-
